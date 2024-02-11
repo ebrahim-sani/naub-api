@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Course {
+  id           String  @id
+  courseCode   String  @unique
+  courseTitle  String  @unique
+  department   String
+  level        String
+  unit         String
+  courseStatus String
+  preReq       String?
+
+  @@index([courseTitle, courseCode])
+}
+
+model CourseRegisteration {
+  id           String
+  courseId     String  @unique
+  courseCode   String
+  courseTitle  String
+  department   String
+  level        String
+  unit         String
+  courseStatus String
+  preReq       String?
+
+  registerCourse   registerCourse? @relation(fields: [registerCourseId], references: [id])
+  registerCourseId String?
+}
+
+model Department {
+  id             String  @id
+  departmentName String  @unique
+  faculty        String
+  profilePicture String?
+  password       String
+  isDepartment   Boolean @default(true)
+  role           Role    @default(DEPARTMENT)
+
+  @@index([departmentName])
+}
+
+model Student {
+  id           String  @id @default(uuid())
+  matricNumber String  @unique
+  firstName    String?
+  lastName     String?
+  hash         String
+  rToken       String?
+
+  // otherName             String?
+  // isStudent             Boolean          @default(true)
+  // department            String
+  // programme             String
+  // faculty               String
+  // modeOfEntry           String
+  // level                 String
+  // profilePicture        String
+  // gender                String
+  // dateOfBirth           String
+  // email                 String           @unique
+  // phoneNumber           String           @unique
+  // country               String
+  // state                 String
+  // lga                   String
+  // address               String
+  // town                  String
+  // maritalStatus         String
+  // religion              String
+  // hairColor             String
+  // tribe                 String
+  // tribalMark            String
+  // bloodGroup            String
+  // genotype              String?
+  // nextOfKinFirstName    String
+  // nextOfKinLastName     String
+  // nextOfKinPhoneNumber  String
+  // nextOfKinRelationship String
+  // nextOfKinAddress      String
+  // role                  Role             @default(STUDENT)
+  courseReg registerCourse[]
+
+  // @@index([matricNumber])
+
+  @@map("student")
+}
+
+model registerCourse {
+  id                  String                @id @default(cuid())
+  registeredTime      DateTime              @default(now())
+  studentId           String?
+  semester            String
+  session             String
+  level               String
+  CourseRegisteration CourseRegisteration[]
+  Student             Student?              @relation(fields: [studentId], references: [id])
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+  DEPARTMENT
+}
